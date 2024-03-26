@@ -9,11 +9,11 @@ prompt3=f"Extract three tags from the following transcript which are not emotion
 
 class transcript_analysis():
 
-    def __init__(self, audio_file):
-        from api_keys import openai_api_key
+    def __init__(self, openai_api_key, audio_file):
         from openai import OpenAI
-        
+
         self.audio_file = audio_file
+
         self.client = OpenAI(api_key=openai_api_key)
 
         journal = open(self.audio_file, "rb")
