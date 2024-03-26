@@ -16,7 +16,7 @@ class transcript_analysis():
 
         self.client = OpenAI(api_key=openai_api_key)
 
-        journal = open(self.audio_file, "rb")
+        journal = open(self.audio_file, 'rb')
         self.transcription = self.client.audio.transcriptions.create(
         model="whisper-1", 
         file=journal, 

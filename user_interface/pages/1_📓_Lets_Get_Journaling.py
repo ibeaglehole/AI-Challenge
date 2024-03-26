@@ -1,19 +1,27 @@
+import io
 import wave
 import streamlit as st
 import speech_recognition as sr
 from streamlit_mic_recorder import mic_recorder, speech_to_text
-from utils.api_keys import openai_api
-from utils.audio_to_emotion import emotion_classifier
-from utils.transcript_analysis import transcript_analysis, prompt1
+from pages.utils.api_keys import openai_api
+from pages.utils.audio_to_emotion import emotion_classifier
+from pages.utils.transcript_analysis import transcript_analysis, prompt1
 
-path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/AI-Challenge/'
+path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/AI-Challenge/user_interface/'
 
 # Preamble
-st.image('FeelFlow.png')
+st.image(path + 'FeelFlow.png')
 st.write("""Whenever you're ready to record your journal entry, just click the button to start recording. 
          Once you're done, click the button again to finish the recording.""")
 
 audio_data = None
+
+def save_as_wav(audio_bytes, filepath, sample_width, sample_rate, num_channels):
+    with wave.open(filepath, 'wb') as wf:
+        wf.setnchannels(num_channels)
+        wf.setsampwidth(sample_width)
+        wf.setframerate(sample_rate)
+        wf.writeframes(audio_bytes)
 
 # Set up a callback function that will save the audio journal recording.
 def callback():
@@ -30,7 +38,12 @@ def callback():
         text = r.recognize_google(audio_data)
         st.write(text)
 
-        audio_to_analyse = transcript_analysis(openai_api, audio_data)
+        filepath = path + 'audio.wav'
+
+        save_as_wav(audio_bytes, filepath, audio_sampwidth, audio_framerate, 1)
+        audio_wav = filepath
+
+        audio_to_analyse = transcript_analysis(openai_api, audio_wav)
         output = audio_to_analyse.prompt_gpt(prompt1)
 
         st.write(output)
