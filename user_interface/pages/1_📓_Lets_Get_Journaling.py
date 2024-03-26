@@ -2,9 +2,11 @@ import wave
 import streamlit as st
 import speech_recognition as sr
 from streamlit_mic_recorder import mic_recorder, speech_to_text
-from transcript_analysis import 
+from utils.api_keys import openai_api
+from utils.audio_to_emotion import emotion_classifier
+from utils.transcript_analysis import transcript_analysis, prompt1
 
-path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/project/'
+path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/AI-Challenge/'
 
 # Preamble
 st.image('FeelFlow.png')
@@ -28,15 +30,10 @@ def callback():
         text = r.recognize_google(audio_data)
         st.write(text)
 
-        # with wave.open('output.wav', 'wb') as wf:
-        #     wf.setnchannels(1)
-        #     wf.setsampwidth(audio_sampwidth)
-        #     wf.setframerate(audio_framerate)
-        #     wf.writeframes(audio_bytes)
+        audio_to_analyse = transcript_analysis(openai_api, audio_data)
+        output = audio_to_analyse.prompt_gpt(prompt1)
 
-        # r = sr.Recognizer()
-        # with sr.AudioFile('output.wav') as source:
-        #     audio_data = r.record
+        st.write(output)
 
 # Implement the mic_recorder function. This appears as a button on the webpage. 
 audio = mic_recorder(

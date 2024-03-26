@@ -1,7 +1,7 @@
 import streamlit as st
 
 # Define the path to your image
-path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/project/'
+path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/AI-Challenge/user_interface/'
 
 # Set the page title and icon
 st.set_page_config(
