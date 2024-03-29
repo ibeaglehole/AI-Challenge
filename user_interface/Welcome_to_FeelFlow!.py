@@ -19,7 +19,6 @@ st.set_page_config(
 st.image(path + "FeelFlow.png")
 
 st.write("# Welcome to FeelFlow, Miles! 👋")
-st.write(emotion_classifier)
 
 st.write(
     "FeelFlow is an AI-powered emotion tracking and journaling app that you can use to support your mental health."

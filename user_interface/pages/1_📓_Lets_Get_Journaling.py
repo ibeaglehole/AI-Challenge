@@ -43,10 +43,18 @@ def callback():
         save_as_wav(audio_bytes, filepath, audio_sampwidth, audio_framerate, 1)
         audio_wav = filepath
 
-        audio_to_analyse = transcript_analysis(openai_api, audio_wav)
-        output = audio_to_analyse.prompt_gpt(prompt1)
+        audio_to_prompt = transcript_analysis(openai_api, audio_wav)
+        output = audio_to_prompt.prompt_gpt(prompt1)
 
         st.write(output)
+
+        emotion_model = path + 'pages/utils/models/mlp_emotion_classifier.pkl'
+        audio_to_emotion = emotion_classifier(audio_wav, emotion_model)
+        top_emotions = audio_to_emotion.top3emotions()
+        emotion_prob = audio_to_emotion.weighted_emotions()
+
+        st.write(top_emotions)
+        st.write(emotion_prob)
 
 # Implement the mic_recorder function. This appears as a button on the webpage. 
 audio = mic_recorder(
