@@ -1,7 +1,7 @@
-prompt1=f"Summarise the following journal transcript into a few sentences"
+prompt1=f"Summarise the following journal transcript into a few sentences. Give your answer by addressing the reader directly, \
+    e.g. with language like 'In today's journal entry, you...'."
 
-prompt2=f"Summarise the feelings in the following transcript into the three key emotions. The output should be a list of \
-    single emotions only."
+prompt2=f"Repeat the text I have just inputted. If there are any spelling/grammar mistakes, please correct these. Do not output any additonal text."
 
 prompt3=f"Extract three tags from the following transcript which are not emotions. The output should be a list of single keywords \
     regarding what the user is talking about. For example, if the user was talking about a time when they went skiing, holiday \

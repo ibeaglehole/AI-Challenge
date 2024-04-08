@@ -2,15 +2,20 @@ import io
 import wave
 import streamlit as st
 import speech_recognition as sr
+import pickle
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
 from streamlit_mic_recorder import mic_recorder, speech_to_text
-from pages.utils.api_keys import openai_api
-from pages.utils.audio_to_emotion import emotion_classifier
-from pages.utils.transcript_analysis import transcript_analysis, prompt1
+from utils.api_keys import openai_api
+from utils.audio_to_emotion import emotion_classifier
+from utils.transcript_analysis import transcript_analysis, prompt1, prompt2
 
 path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/AI-Challenge/user_interface/'
+entry_recorded = False
 
 # Preamble
-st.image(path + 'FeelFlow.png')
+st.image(path + '/images/FeelFlow.png')
 st.write("""Whenever you're ready to record your journal entry, just click the button to start recording. 
          Once you're done, click the button again to finish the recording.""")
 
@@ -32,29 +37,72 @@ def callback():
         audio_sampwidth = st.session_state.my_recorder_output['sample_width']
         audio_framerate = st.session_state.my_recorder_output['sample_rate']
 
-        r = sr.Recognizer()
-        audio_data = sr.AudioData(audio_bytes, sample_rate=audio_framerate, sample_width=audio_sampwidth)
+        # r = sr.Recognizer()
+        # audio_data = sr.AudioData(audio_bytes, sample_rate=audio_framerate, sample_width=audio_sampwidth)
 
-        text = r.recognize_google(audio_data)
-        st.write(text)
+        # text = r.recognize_google(audio_data)
+        # st.write(text)
 
-        filepath = path + 'audio.wav'
+        today_date = datetime.now().strftime('%Y-%m-%d')
+        audio_f = path + f'history/audio_{today_date}.wav'
 
-        save_as_wav(audio_bytes, filepath, audio_sampwidth, audio_framerate, 1)
-        audio_wav = filepath
+        save_as_wav(audio_bytes, audio_f, audio_sampwidth, audio_framerate, 1)
+        audio_wav = audio_f
 
         audio_to_prompt = transcript_analysis(openai_api, audio_wav)
-        output = audio_to_prompt.prompt_gpt(prompt1)
 
+        transcript = audio_to_prompt.prompt_gpt(prompt2)
+        st.write('**Here is the transcript of your journal entry:**')
+        st.write(transcript)
+
+        output = audio_to_prompt.prompt_gpt(prompt1)
+        st.write("**Here is a summary of today's journal entry:**")
         st.write(output)
 
-        emotion_model = path + 'pages/utils/models/mlp_emotion_classifier.pkl'
+        emotion_model = path + '/utils/models/mlp_emotion_classifier.pkl'
         audio_to_emotion = emotion_classifier(audio_wav, emotion_model)
         top_emotions = audio_to_emotion.top3emotions()
         emotion_prob = audio_to_emotion.weighted_emotions()
 
-        st.write(top_emotions)
-        st.write(emotion_prob)
+        emot_f = path + f'history/emotions_data_{today_date}.pkl'
+
+        data_to_store = {'top_emotions': top_emotions, 'emotion_prob': emotion_prob}
+
+        with open(emot_f, 'wb') as f:
+            pickle.dump(data_to_store, f)
+
+        st.write("**Your top three emotions based on your audio:**")
+        emotions_html = ""
+        for emotion in top_emotions:
+            color = emotion_colours[emotion]
+            emotions_html += f'<div style="background-color: {color}; width: 200px; height: 50px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-right: 20px;"><h2>{emotion}</h2></div>'
+
+        st.markdown(emotions_html, unsafe_allow_html=True)
+        
+        fig, ax = plt.subplots(figsize=(8, 6))
+
+        ax.clear()
+
+        emotions = [emotion.capitalize() for emotion in top_emotions]
+        probabilities = [emotion_prob[emotion] for emotion in top_emotions]
+        colors = [emotion_colours[emotion] for emotion in top_emotions]
+
+        ax.bar(emotions, probabilities, color=colors)
+        ax.set_ylabel('Probability')
+        ax.set_title('Top Three Emotions and Their Probabilities')
+
+        st.pyplot(fig)
+    
+emotion_colours = {
+    'sad': '#ADD8E6',       # Light blue (Pastel)
+    'calm': '#98FB98',      # Light green (Pastel)
+    'neutral': '#FFFFE0',   # Light yellow (Pastel)
+    'angry': '#FFA07A',     # Light salmon (Pastel)
+    'disgust': '#E6E6FA',   # Lavender (Pastel)
+    'fearful': '#FFD700',   # Gold (Pastel)
+    'happy': '#00FFFF',     # Light cyan (Pastel)
+    'surprised': '#FFC0CB'  # Pink (Pastel)
+}
 
 # Implement the mic_recorder function. This appears as a button on the webpage. 
 audio = mic_recorder(
@@ -69,3 +117,4 @@ audio = mic_recorder(
     key='my_recorder'
 )
 
+    
