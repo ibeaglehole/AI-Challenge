@@ -14,6 +14,12 @@ from utils.transcript_analysis import transcript_analysis, prompt1, prompt2
 path = 'C:/Users/Work/OneDrive - University of Bath/ART-AI MRes Modules/CM50304 AI Challenge/AI-Challenge/user_interface/'
 entry_recorded = False
 
+# Set the page title and icon
+st.set_page_config(
+    page_title="Welcome to FeelFlow!",
+    page_icon=path + '/images/FeelFlow_logo.png'
+)
+
 # Preamble
 st.image(path + '/images/FeelFlow.png')
 st.write("""Whenever you're ready to record your journal entry, just click the button to start recording. 
@@ -55,9 +61,9 @@ def callback():
         st.write('**Here is the transcript of your journal entry:**')
         st.write(transcript)
 
-        output = audio_to_prompt.prompt_gpt(prompt1)
+        summary = audio_to_prompt.prompt_gpt(prompt1)
         st.write("**Here is a summary of today's journal entry:**")
-        st.write(output)
+        st.write(summary)
 
         emotion_model = path + '/utils/models/mlp_emotion_classifier.pkl'
         audio_to_emotion = emotion_classifier(audio_wav, emotion_model)
@@ -66,7 +72,7 @@ def callback():
 
         emot_f = path + f'history/emotions_data_{today_date}.pkl'
 
-        data_to_store = {'top_emotions': top_emotions, 'emotion_prob': emotion_prob}
+        data_to_store = {'transcript': transcript, 'summary': summary, 'top_emotions': top_emotions, 'emotion_prob': emotion_prob}
 
         with open(emot_f, 'wb') as f:
             pickle.dump(data_to_store, f)
@@ -75,7 +81,7 @@ def callback():
         emotions_html = ""
         for emotion in top_emotions:
             color = emotion_colours[emotion]
-            emotions_html += f'<div style="background-color: {color}; width: 200px; height: 50px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-right: 20px;"><h2>{emotion}</h2></div>'
+            emotions_html += f'<div style="background-color: {color}; width: 200px; height: 50px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-right: 20px; text-align: centre;"><h2>{emotion}</h2></div>'
 
         st.markdown(emotions_html, unsafe_allow_html=True)
         
@@ -92,6 +98,11 @@ def callback():
         ax.set_title('Top Three Emotions and Their Probabilities')
 
         st.pyplot(fig)
+
+        st.write("**If you'd like, you can view some of your old journal content from the page below.**")
+
+        if st.button("View My Past Journal Entries"):
+            st.switch_page("pages/2_🗃️_Previous_Journal_Entries.py")
     
 emotion_colours = {
     'sad': '#ADD8E6',       # Light blue (Pastel)
